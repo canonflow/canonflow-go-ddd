@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/canonflow/canonflow-go-ddd/pkg/model"
+	"github.com/canonflow/canonflow-go-ddd/pkg/response"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -18,7 +18,7 @@ func PanicRecovery(log *logrus.Logger) gin.HandlerFunc {
 				log.Errorf("%s \"%s\" - Panic Occured: %+v", ctx.Request.Method, ctx.Request.URL, err)
 
 				//! Return a unified error response
-				ctx.JSON(http.StatusInternalServerError, model.ErrorResponse{
+				ctx.JSON(http.StatusInternalServerError, response.BaseErrorResponse{
 					Code:   http.StatusInternalServerError,
 					Status: "Internal Server Error",
 					Error:  fmt.Sprintf("%v", err),
@@ -46,7 +46,7 @@ func NewGin(config *viper.Viper, log *logrus.Logger) *gin.Engine {
 	app.Use(PanicRecovery(log))
 
 	app.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(http.StatusNotFound, model.ErrorResponse{
+		ctx.JSON(http.StatusNotFound, response.BaseErrorResponse{
 			Code:   http.StatusNotFound,
 			Status: "Not Found",
 			Error:  fmt.Sprintf("%s not found", ctx.Request.URL),
