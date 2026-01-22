@@ -79,3 +79,12 @@ func (u *UserUsecaseImpl) Login(user *model.User, password string) error {
 
 	return nil
 }
+
+func (u *UserUsecaseImpl) FindByUsername(username string) (*model.User, error) {
+	user, err := u.UserRepository.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

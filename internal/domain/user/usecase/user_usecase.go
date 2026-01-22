@@ -10,4 +10,5 @@ type UserUsecase interface {
 	CreateAccessToken(user *model.User) (string, error)
 	Create(ctx context.Context, username string, password string) (model.User, error)
 	Login(user *model.User, password string) error
+	FindByUsername(username string) (*model.User, error)
 }

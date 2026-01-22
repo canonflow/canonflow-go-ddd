@@ -9,6 +9,10 @@ type UserRepositoryImpl struct {
 	DB *gorm.DB
 }
 
+func NewUserRepositoryImpl(DB *gorm.DB) UserRepository {
+	return &UserRepositoryImpl{DB: DB}
+}
+
 func (repo *UserRepositoryImpl) Create(db *gorm.DB, user *model.User) error {
 	return db.Create(user).Error
 }
