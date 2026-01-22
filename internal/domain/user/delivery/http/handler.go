@@ -146,7 +146,7 @@ func (h *UserHandler) Me(ctx *gin.Context) {
 	contextParse := contextUser.(model.User)
 
 	// Get the user
-	user, _ := h.UserUsecase.FindByUsername(contextParse.Username)
+	user, _ := h.UserUsecase.FindById(contextParse.ID)
 
 	ctx.JSON(http.StatusOK, response.BaseSuccessResponse{
 		Code:   http.StatusOK,

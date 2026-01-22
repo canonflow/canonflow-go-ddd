@@ -88,3 +88,12 @@ func (u *UserUsecaseImpl) FindByUsername(username string) (*model.User, error) {
 
 	return user, nil
 }
+
+func (u *UserUsecaseImpl) FindById(id int64) (*model.User, error) {
+	user, err := u.UserRepository.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

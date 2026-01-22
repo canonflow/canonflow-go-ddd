@@ -11,4 +11,5 @@ type UserUsecase interface {
 	Create(ctx context.Context, username string, password string) (model.User, error)
 	Login(user *model.User, password string) error
 	FindByUsername(username string) (*model.User, error)
+	FindById(id int64) (*model.User, error)
 }
