@@ -28,7 +28,7 @@ func Bootstrap(config *BootstrapConfig) {
 	userUsecase := usecase.NewUserUsecase(config.DB, config.Log, config.Config, userRepository)
 
 	// TODO: Setup all handler
-	userHandler := userHttp.NewUserHandler(userUsecase)
+	userHandler := userHttp.NewUserHandler(userUsecase, config.Config)
 
 	// TODO: Setup all middlewares
 	authMiddleware := middleware.AuthMiddleware(config.Config.GetString("JWT_SECRET_KEY"))

@@ -22,5 +22,13 @@ func (route *UserRoute) Init() {
 	auth := route.App.Group("auth")
 	{
 		auth.POST("/signup", route.Handler.SignUp)
+		auth.POST("/signin", route.Handler.SignIn)
+
+		authMiddleware := auth.Group("")
+		{
+			authMiddleware.Use(*route.AuthMiddleware)
+			authMiddleware.GET("/me", route.Handler.Me)
+			authMiddleware.POST("/signout", route.Handler.SignOut)
+		}
 	}
 }
