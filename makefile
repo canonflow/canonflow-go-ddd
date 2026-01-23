@@ -19,10 +19,12 @@ ifeq ($(MESSAGING),true)
 	@echo "package messaging" > internal/domain/$(DOMAIN)/gateway/messaging/$(DOMAIN)_producer.go
 	@echo "package messaging" > internal/domain/$(DOMAIN)/delivery/messaging/$(DOMAIN)_consumer.go
 	@echo "package model" > internal/domain/$(DOMAIN)/model/$(DOMAIN)_event.go
-	@mkdir -p internal/contract
-	@if [ ! -f internal/contract/event.go ]; then \
-		echo "package contract\n\ntype Event interface {\n\tGetId() string\n}" > internal/contract/event.go; \
-	fi
+# 	@mkdir -p internal/contract
+# 	@mkdir -p pkg/injector
+# 	@if [ ! -f internal/contract/event.go ]; then \
+# 		echo "package contract\n\ntype Event interface {\n\tGetId() string\n}" > internal/contract/event.go; \
+# 		echo "package contract\n\ntype ProducerContract interface {\n\tGetTopic() *string\n\tSend(event Event) error\n}" > internal/contract/producer.go; \
+# 	fi
 endif
 
 	@echo "package repository" > internal/domain/$(DOMAIN)/repository/$(DOMAIN)_repository.go
