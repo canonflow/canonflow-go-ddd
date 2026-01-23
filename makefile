@@ -2,7 +2,7 @@
 
 new-domain:
 ifndef DOMAIN
-	$(error DOMAIN is not set. Usage: make new-domain DOMAIN=<your-domain>)
+	$(error DOMAIN is not set. Usage: make new-domain DOMAIN=<your-domain> [MESSAGING=false])
 endif
 
 	@echo "Creating new domain: $(DOMAIN)"
@@ -12,6 +12,18 @@ endif
 	@mkdir -p internal/domain/$(DOMAIN)/delivery
 	@mkdir -p internal/domain/$(DOMAIN)/delivery/http
 	@mkdir -p internal/domain/$(DOMAIN)/usecase
+
+ifeq ($(MESSAGING),true)
+	@mkdir -p internal/domain/$(DOMAIN)/gateway/messaging
+	@mkdir -p internal/domain/$(DOMAIN)/delivery/messaging
+	@echo "package messaging" > internal/domain/$(DOMAIN)/gateway/messaging/$(DOMAIN)_producer.go
+	@echo "package messaging" > internal/domain/$(DOMAIN)/delivery/messaging/$(DOMAIN)_consumer.go
+	@echo "package model" > internal/domain/$(DOMAIN)/model/$(DOMAIN)_event.go
+	@mkdir -p internal/contract
+	@if [ ! -f internal/contract/event.go ]; then \
+		echo "package contract\n\ntype Event interface {\n\tGetId() string\n}" > internal/contract/event.go; \
+	fi
+endif
 
 	@echo "package repository" > internal/domain/$(DOMAIN)/repository/$(DOMAIN)_repository.go
 	@echo "package repository" > internal/domain/$(DOMAIN)/repository/$(DOMAIN)_repository_impl.go
@@ -26,4 +38,8 @@ endif
 	@echo "package usecase" > internal/domain/$(DOMAIN)/usecase/$(DOMAIN)_usecase.go
 	@echo "package usecase" > internal/domain/$(DOMAIN)/usecase/$(DOMAIN)_usecase_impl.go
 
+ifeq ($(MESSAGING),true)
+	@echo "Domain $(DOMAIN) with messaging created successfully."
+else
 	@echo "Domain $(DOMAIN) created successfully."
+endif
