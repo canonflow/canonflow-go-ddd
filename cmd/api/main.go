@@ -27,6 +27,7 @@ func main() {
 
 	app := config.NewGin(viperConfig, log)
 	db := config.NewDatabase(viperConfig, log)
+	producer := config.NewKafkaProducer(viperConfig, log)
 
 	// TODO: Bootstrap all configs
 	config.Bootstrap(&config.BootstrapConfig{
@@ -35,6 +36,7 @@ func main() {
 		Log:      log,
 		Validate: validate,
 		Config:   viperConfig,
+		Producer: producer,
 	})
 
 	// TODO: Get the web port

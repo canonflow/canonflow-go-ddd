@@ -1,7 +1,10 @@
 package config
 
 import (
+	"github.com/IBM/sarama"
+	"github.com/canonflow/canonflow-go-ddd/internal/contract"
 	userHttp "github.com/canonflow/canonflow-go-ddd/internal/domain/user/delivery/http"
+	gateway "github.com/canonflow/canonflow-go-ddd/internal/domain/user/gateway/messaging"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/repository"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/usecase"
 	"github.com/canonflow/canonflow-go-ddd/internal/middleware"
@@ -18,14 +21,24 @@ type BootstrapConfig struct {
 	Log      *logrus.Logger
 	Validate *validator.Validate
 	Config   *viper.Viper
+	Producer sarama.SyncProducer
 }
 
 func Bootstrap(config *BootstrapConfig) {
 	// TODO: Setup all repositories
 	userRepository := repository.NewUserRepositoryImpl(config.DB)
 
+	// TODO: Setup all producers
+	var userProducer contract.ProducerContract
+
+	if config.Producer != nil {
+		userProducer = gateway.NewUserProducer(config.Producer, config.Log)
+	} else {
+		config.Log.Warn("producer is not initialized")
+	}
+
 	// TODO: Setup all use cases
-	userUsecase := usecase.NewUserUsecase(config.DB, config.Log, config.Config, userRepository)
+	userUsecase := usecase.NewUserUsecase(config.DB, config.Log, config.Config, userRepository, userProducer)
 
 	// TODO: Setup all handler
 	userHandler := userHttp.NewUserHandler(userUsecase, config.Config)

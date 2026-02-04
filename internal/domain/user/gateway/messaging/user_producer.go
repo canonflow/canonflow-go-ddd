@@ -16,7 +16,7 @@ func NewUserProducer(producer sarama.SyncProducer, log *logrus.Logger) contract.
 	return &UserProducer{
 		ProducerHandler: broker.ProducerHandler[*model.UserEvent]{
 			Producer: producer,
-			Topic:    "users",
+			Topic:    broker.USER_TOPIC,
 			Log:      log,
 		},
 	}

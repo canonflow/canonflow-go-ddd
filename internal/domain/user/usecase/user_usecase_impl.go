@@ -3,7 +3,9 @@ package usecase
 import (
 	"context"
 	"errors"
+	"strconv"
 
+	"github.com/canonflow/canonflow-go-ddd/internal/contract"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/model"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/repository"
 	"github.com/canonflow/canonflow-go-ddd/pkg/jwt"
@@ -18,14 +20,16 @@ type UserUsecaseImpl struct {
 	Log            *logrus.Logger
 	Config         *viper.Viper
 	UserRepository repository.UserRepository
+	UserProducer   contract.ProducerContract
 }
 
-func NewUserUsecase(db *gorm.DB, log *logrus.Logger, config *viper.Viper, userRepository repository.UserRepository) UserUsecase {
+func NewUserUsecase(db *gorm.DB, log *logrus.Logger, config *viper.Viper, userRepository repository.UserRepository, userProducer contract.ProducerContract) UserUsecase {
 	return &UserUsecaseImpl{
 		DB:             db,
 		Log:            log,
 		Config:         config,
 		UserRepository: userRepository,
+		UserProducer:   userProducer,
 	}
 }
 
@@ -68,6 +72,22 @@ func (u *UserUsecaseImpl) Create(context context.Context, username string, passw
 		return model.User{}, err
 	}
 
+	if u.UserProducer != nil {
+		event := model.UserEvent{
+			ID:        strconv.Itoa(int(user.ID)),
+			Username:  user.Username,
+			CreatedAt: user.CreatedAt.UnixMicro(),
+			UpdatedAt: user.UpdatedAt.UnixMicro(),
+		}
+		u.Log.Info("Publishing user created event")
+		if err = u.UserProducer.Send(&event); err != nil {
+			u.Log.Warnf("Failed publish user created event : %+v", err)
+			return user, err
+		}
+	} else {
+		u.Log.Info("Kafka producer is disabled, skipping user created event")
+	}
+
 	return user, nil
 }
 
@@ -75,6 +95,22 @@ func (u *UserUsecaseImpl) Login(user *model.User, password string) error {
 	//* Check Password
 	if !utils.CheckPassword(password, user.Password) {
 		return errors.New("Wrong Credentials")
+	}
+
+	if u.UserProducer != nil {
+		event := model.UserEvent{
+			ID:        strconv.Itoa(int(user.ID)),
+			Username:  user.Username,
+			CreatedAt: user.CreatedAt.UnixMicro(),
+			UpdatedAt: user.UpdatedAt.UnixMicro(),
+		}
+		u.Log.Info("Publishing user created event")
+		if err := u.UserProducer.Send(&event); err != nil {
+			u.Log.Warnf("Failed publish user created event : %+v", err)
+			return nil
+		}
+	} else {
+		u.Log.Info("Kafka producer is disabled, skipping user created event")
 	}
 
 	return nil
