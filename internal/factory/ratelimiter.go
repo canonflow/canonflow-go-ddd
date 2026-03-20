@@ -33,9 +33,6 @@ func newTokenBucketRateLimiter(rdb *redis.Client, limit int) *tokenBucketRateLim
 	}
 }
 
-func (limiter *tokenBucketRateLimiter) StartRefill() {
-}
-
 func (limiter *tokenBucketRateLimiter) Check(ctx context.Context, identifier string) response.RateLimiterResponse {
 	limiter.Mu.Lock()
 	defer limiter.Mu.Unlock()
