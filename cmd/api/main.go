@@ -27,12 +27,14 @@ func main() {
 
 	app := config.NewGin(viperConfig, log)
 	db := config.NewDatabase(viperConfig, log)
+	redis := config.NewRedis(viperConfig, log)
 	producer := config.NewKafkaProducer(viperConfig, log)
 
 	// TODO: Bootstrap all configs
 	config.Bootstrap(&config.BootstrapConfig{
 		DB:       db,
 		App:      app,
+		Redis:    redis,
 		Log:      log,
 		Validate: validate,
 		Config:   viperConfig,

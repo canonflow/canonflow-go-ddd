@@ -29,11 +29,11 @@ services:
   redis:
     image: redis:8.6.1
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli -a canonflow ping | grep PONG"]
       interval: 1s
       timeout: 3s
     ports:
       - 6379:6379
-    command: ["redis-server"]
+    command: ["redis-server", "--requirepass", "canonflow"]
     volumes:
       - redis_data:/data
