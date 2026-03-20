@@ -1,6 +1,7 @@
 volumes:
   zookeeper_data:
   kafka_data:
+  redis_data:
 
 services:
   zookeeper:
@@ -24,3 +25,15 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  redis:
+    image: redis:8.6.1
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+    ports:
+      - 6379:6379
+    command: ["redis-server"]
+    volumes:
+      - redis_data:/data
