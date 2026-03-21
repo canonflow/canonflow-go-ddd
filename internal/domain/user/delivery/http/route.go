@@ -5,16 +5,18 @@ import (
 )
 
 type UserRoute struct {
-	App            *gin.Engine
-	Handler        *UserHandler
-	AuthMiddleware *gin.HandlerFunc
+	App                   *gin.Engine
+	Handler               *UserHandler
+	AuthMiddleware        *gin.HandlerFunc
+	RateLimiterMiddleware *gin.HandlerFunc
 }
 
-func NewUserRoute(app *gin.Engine, handler *UserHandler, authMiddleware *gin.HandlerFunc) *UserRoute {
+func NewUserRoute(app *gin.Engine, handler *UserHandler, authMiddleware *gin.HandlerFunc, rateLimiterMiddleware *gin.HandlerFunc) *UserRoute {
 	return &UserRoute{
-		App:            app,
-		Handler:        handler,
-		AuthMiddleware: authMiddleware,
+		App:                   app,
+		Handler:               handler,
+		AuthMiddleware:        authMiddleware,
+		RateLimiterMiddleware: rateLimiterMiddleware,
 	}
 }
 
@@ -27,7 +29,11 @@ func (route *UserRoute) Init() {
 		authMiddleware := auth.Group("")
 		{
 			authMiddleware.Use(*route.AuthMiddleware)
-			authMiddleware.GET("/me", route.Handler.Me)
+			rateLimiterMiddleware := authMiddleware.Group("")
+			{
+				rateLimiterMiddleware.Use(*route.RateLimiterMiddleware)
+				rateLimiterMiddleware.GET("/me", route.Handler.Me)
+			}
 			authMiddleware.POST("/signout", route.Handler.SignOut)
 		}
 	}

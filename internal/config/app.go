@@ -7,6 +7,7 @@ import (
 	gateway "github.com/canonflow/canonflow-go-ddd/internal/domain/user/gateway/messaging"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/repository"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/usecase"
+	"github.com/canonflow/canonflow-go-ddd/internal/factory"
 	"github.com/canonflow/canonflow-go-ddd/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -48,7 +49,15 @@ func Bootstrap(config *BootstrapConfig) {
 	// TODO: Setup all middlewares
 	authMiddleware := middleware.AuthMiddleware(config.Config.GetString("JWT_SECRET_KEY"))
 
+	rateLimiter := factory.NewRateLimiterFactory("token_bucket", config.Redis, 5)
+	rateLimiterMiddleware := middleware.RateLimiter(rateLimiter, config.Redis)
+
 	// TODO: Setup Routes
-	userRoute := userHttp.NewUserRoute(config.App, userHandler, &authMiddleware)
+	userRoute := userHttp.NewUserRoute(
+		config.App,
+		userHandler,
+		&authMiddleware,
+		&rateLimiterMiddleware,
+	)
 	userRoute.Init()
 }

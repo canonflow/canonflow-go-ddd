@@ -93,7 +93,7 @@ func (limiter *tokenBucketRateLimiter) Check(ctx context.Context, identifier str
 		Allow: allowed,
 		Metadata: map[string]interface{}{
 			"tokens":      tokens,
-			"last_access": lastRefill,
+			"last_refill": lastRefill,
 		},
 	}
 }

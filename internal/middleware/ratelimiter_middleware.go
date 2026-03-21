@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/canonflow/canonflow-go-ddd/internal/contract"
 	"github.com/canonflow/canonflow-go-ddd/pkg/response"
@@ -15,7 +16,12 @@ func RateLimiter(limiter contract.RateLimiterContract, rds *redis.Client) gin.Ha
 		userIp := ctx.ClientIP()
 
 		result := limiter.Check(ctx, userIp)
-		fmt.Println(result)
+
+		//* Attaches all metadata from rate limiter
+		for key, value := range result.Metadata {
+			headerKey := "X-" + strings.ReplaceAll(strings.Title(key), "_", "-")
+			ctx.Header(headerKey, fmt.Sprintf("%v", value))
+		}
 
 		if !result.Allow {
 			ctx.JSON(http.StatusTooManyRequests, response.BaseErrorResponse{
@@ -26,5 +32,7 @@ func RateLimiter(limiter contract.RateLimiterContract, rds *redis.Client) gin.Ha
 			ctx.Abort()
 			return
 		}
+
+		ctx.Next()
 	}
 }
