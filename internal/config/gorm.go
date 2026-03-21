@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var availableDriver = []string{"mysql", "postgre"}
+var AVAILABLE_DRIVERS = []string{"mysql", "postgres"}
 
 func NewDatabase(config *viper.Viper, log *logrus.Logger) *gorm.DB {
 	driver := strings.ToLower(config.GetString("DB_DRIVER"))
@@ -26,7 +26,7 @@ func NewDatabase(config *viper.Viper, log *logrus.Logger) *gorm.DB {
 	maxConnection := config.GetInt("DB_MAX")
 	maxLifeTimeConnection := config.GetInt("DB_LIFETIME")
 
-	if !utils.SliceContains(availableDriver, driver) {
+	if !utils.SliceContains(AVAILABLE_DRIVERS, driver) {
 		log.Fatal("Unsupported Database Driver")
 	}
 

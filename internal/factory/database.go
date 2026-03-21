@@ -37,7 +37,7 @@ func (driver *postgreSQLDriver) GetDSN() string {
 func NewDatabaseFactory(driver string, username string, password string, host string, port int, database string) contract.DatabaseContract {
 	if driver == "mysql" {
 		return newMysqlDriver(username, password, host, port, database)
-	} else if driver == "postgre" {
+	} else if driver == "postgres" {
 		return newPostgreSQLDriver(username, password, host, port, database)
 	}
 
