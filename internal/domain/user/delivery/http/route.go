@@ -21,7 +21,7 @@ func NewUserRoute(app *gin.Engine, handler *UserHandler, authMiddleware *gin.Han
 }
 
 func (route *UserRoute) Init() {
-	auth := route.App.Group("auth")
+	auth := route.App.Group("api/v1/auth")
 	{
 		auth.POST("/signup", route.Handler.SignUp)
 		auth.POST("/signin", route.Handler.SignIn)
