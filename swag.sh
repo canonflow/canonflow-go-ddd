@@ -1,0 +1,2 @@
+#! /bin/bash
+swag init -g main.go --dir ./cmd/api,./internal/domain/user/delivery/http,./internal/domain/user/dto,./internal/domain/user/model,./pkg/response --parseDependency --parseInternal --output ./cmd/api/docs

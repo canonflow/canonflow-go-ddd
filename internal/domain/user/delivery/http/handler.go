@@ -25,6 +25,18 @@ func NewUserHandler(userUsecase usecase.UserUsecase, config *viper.Viper) *UserH
 	}
 }
 
+// SignUp godoc
+// @Summary      Create an account
+// @Description  create a new account with the provided information
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.CreateUserRequest  true  "User information"
+// @Success      200  {object}  response.BaseSuccessResponse
+// @Failure      400  {object}  response.BaseErrorResponse
+// @Failure      404  {object}  response.BaseErrorResponse
+// @Failure      500  {object}  response.BaseErrorResponse
+// @Router       /api/v1/auth/signup [post]
 func (h *UserHandler) SignUp(ctx *gin.Context) {
 	// TODO: Validate
 	var request dto.CreateUserRequest
@@ -71,6 +83,18 @@ func (h *UserHandler) SignUp(ctx *gin.Context) {
 	})
 }
 
+// SignIn godoc
+// @Summary      Sign in to an existing account
+// @Description  sign in to an existing account with the provided information
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.UserLoginRequest  true  "User credentials"
+// @Success      200  {object}  response.BaseSuccessResponse
+// @Failure      400  {object}  response.BaseErrorResponse
+// @Failure      404  {object}  response.BaseErrorResponse
+// @Failure      500  {object}  response.BaseErrorResponse
+// @Router       /api/v1/auth/signin [post]
 func (h *UserHandler) SignIn(ctx *gin.Context) {
 	// TODO: Validate
 	var request dto.UserLoginRequest
@@ -130,6 +154,17 @@ func (h *UserHandler) SignIn(ctx *gin.Context) {
 	})
 }
 
+// Me godoc
+// @Summary      Get user information
+// @Description  get user information for the authenticated user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  response.BaseSuccessResponse
+// @Failure      400  {object}  response.BaseErrorResponse
+// @Failure      404  {object}  response.BaseErrorResponse
+// @Failure      500  {object}  response.BaseErrorResponse
+// @Router       /api/v1/auth/me [get]
 func (h *UserHandler) Me(ctx *gin.Context) {
 	contextUser, ok := ctx.Get(jwt.USER_KEY)
 
@@ -155,6 +190,17 @@ func (h *UserHandler) Me(ctx *gin.Context) {
 	})
 }
 
+// SignOut godoc
+// @Summary      Sign out of the current account
+// @Description  sign out of the current account and invalidate the access token
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  response.BaseSuccessResponse
+// @Failure      400  {object}  response.BaseErrorResponse
+// @Failure      404  {object}  response.BaseErrorResponse
+// @Failure      500  {object}  response.BaseErrorResponse
+// @Router       /api/v1/auth/signout [post]
 func (h *UserHandler) SignOut(ctx *gin.Context) {
 	jwt.DeleteToken(ctx)
 

@@ -1,5 +1,11 @@
 package main
 
+// @title           Canonflow API
+// @version         1.0
+// @description     Canonflow API documentation
+// @host            localhost:8000
+// @BasePath        /
+
 import (
 	"context"
 	"net/http"
@@ -9,9 +15,13 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/canonflow/canonflow-go-ddd/cmd/api/docs"
 	"github.com/canonflow/canonflow-go-ddd/internal/config"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -29,6 +39,15 @@ func main() {
 	db := config.NewDatabase(viperConfig, log)
 	redis := config.NewRedis(viperConfig, log)
 	producer := config.NewKafkaProducer(viperConfig, log)
+
+	url := ginSwagger.URL("http://localhost:8000/swagger/doc.json")
+	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"*"},
+		AllowCredentials: true,
+	}))
 
 	// TODO: Bootstrap all configs
 	config.Bootstrap(&config.BootstrapConfig{
