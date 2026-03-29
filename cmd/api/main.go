@@ -8,6 +8,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -40,7 +41,11 @@ func main() {
 	redis := config.NewRedis(viperConfig, log)
 	producer := config.NewKafkaProducer(viperConfig, log)
 
-	url := ginSwagger.URL("http://localhost:8000/swagger/doc.json")
+	// TODO: Get the web port
+	webHost := viperConfig.GetString("DB_HOST")
+	webPort := viperConfig.GetInt("WEB_PORT")
+
+	url := ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", webPort))
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
@@ -59,10 +64,6 @@ func main() {
 		Config:   viperConfig,
 		Producer: producer,
 	})
-
-	// TODO: Get the web port
-	webHost := viperConfig.GetString("DB_HOST")
-	webPort := viperConfig.GetInt("WEB_PORT")
 
 	server := &http.Server{
 		Addr:    webHost + ":" + strconv.Itoa(webPort),
