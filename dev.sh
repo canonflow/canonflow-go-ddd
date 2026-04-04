@@ -1,2 +1,2 @@
 #! /bin/bash
-compiledaemon -directory .  -build-dir="./cmd/api/" --command="./cmd/api/api.exe"
+compiledaemon -directory .  -build-dir="./cmd/api/" --command="./cmd/api/api" --color --recursive

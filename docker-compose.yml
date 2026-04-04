@@ -2,6 +2,7 @@ volumes:
   zookeeper_data:
   kafka_data:
   redis_data:
+  rabbitmq_data:
 
 services:
   zookeeper:
@@ -37,3 +38,21 @@ services:
     command: ["redis-server", "--requirepass", "canonflow"]
     volumes:
       - redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:4.2.0-management
+    container_name: rabbitmq_service
+    environment:
+      RABBITMQ_DEFAULT_USER: canonflow
+      RABBITMQ_DEFAULT_PASS: canonflow
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 10s

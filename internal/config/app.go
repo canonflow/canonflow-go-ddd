@@ -5,10 +5,12 @@ import (
 	"github.com/canonflow/canonflow-go-ddd/internal/contract"
 	userHttp "github.com/canonflow/canonflow-go-ddd/internal/domain/user/delivery/http"
 	gateway "github.com/canonflow/canonflow-go-ddd/internal/domain/user/gateway/messaging"
+	userQueue "github.com/canonflow/canonflow-go-ddd/internal/domain/user/queue"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/repository"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/usecase"
 	"github.com/canonflow/canonflow-go-ddd/internal/factory"
 	"github.com/canonflow/canonflow-go-ddd/internal/middleware"
+	queue "github.com/canonflow/canonflow-go-ddd/pkg/queue"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
@@ -51,6 +53,12 @@ func Bootstrap(config *BootstrapConfig) {
 
 	rateLimiter := factory.NewRateLimiterFactory("token_bucket", config.Redis, 5)
 	rateLimiterMiddleware := middleware.RateLimiter(rateLimiter, config.Redis)
+
+	// TODO: Init Queue
+	NewQueue(config.Config, config.Log)
+	queue.RegisterQueueHandler([]contract.QueueContract{
+		userQueue.NewUserQueue(userQueue.QUEUE_NAME),
+	})
 
 	// TODO: Setup Routes
 	userRoute := userHttp.NewUserRoute(
