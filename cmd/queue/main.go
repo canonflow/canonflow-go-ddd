@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
@@ -20,15 +19,12 @@ func main() {
 	logrus := config.NewLogrus(viperConfig)
 	db := config.NewDatabase(viperConfig, logrus)
 	ctx, cancel := context.WithCancel(context.Background())
-
-	var wg sync.WaitGroup
+	defer cancel()
 
 	// TODO: Consume all messages in RabbitMQ Queue
 	for queueName, handler := range queuePkg.QueueClient.Handler {
 		logrus.Infof("Consuming queue: %s", queueName)
-		wg.Add(1)
 		go func(ctx context.Context, queueName string, handler contract.QueueContract, db *gorm.DB) {
-			defer wg.Done()
 			msgs, err := queuePkg.ConsumeQueue(ctx, queueName)
 			if err != nil {
 				logrus.Errorf("Failed to consume queue %s: %s", queueName, err)
@@ -66,14 +62,13 @@ func main() {
 		}(ctx, queueName, handler, db)
 
 	}
-	wg.Wait()
 
 	// Graceful shutdown
 	terminateSignals := make(chan os.Signal, 1)
 	signal.Notify(terminateSignals, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
 
 	<-terminateSignals
-	logrus.Info("Got one of stop signals, shutting down worker gracefully")
+	logrus.Info("Got one of stop signals, shutting down queue gracefully")
 	cancel()
 
 	time.Sleep(5 * time.Second)
