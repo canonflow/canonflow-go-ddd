@@ -23,6 +23,10 @@ type QueueRecord struct {
 	UpdatedAt time.Time `gorm:"column:updated_at;autoCreateTime;autoUpdateTime json:"updated_at"`
 }
 
+func (queueRecord *QueueRecord) TableName() string {
+	return "queues"
+}
+
 type QueueMessage struct {
 	UniqueID string                 `json:"unique_id"`
 	Payload  map[string]interface{} `json:"payload"`

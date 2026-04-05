@@ -1,12 +1,16 @@
 package http
 
 import (
+	"context"
+	"log"
 	"net/http"
 
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/dto"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/model"
+	userQueue "github.com/canonflow/canonflow-go-ddd/internal/domain/user/queue"
 	"github.com/canonflow/canonflow-go-ddd/internal/domain/user/usecase"
 	"github.com/canonflow/canonflow-go-ddd/pkg/jwt"
+	queuePkg "github.com/canonflow/canonflow-go-ddd/pkg/queue"
 	"github.com/canonflow/canonflow-go-ddd/pkg/response"
 	"github.com/canonflow/canonflow-go-ddd/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -182,6 +186,26 @@ func (h *UserHandler) Me(ctx *gin.Context) {
 
 	// Get the user
 	user, _ := h.UserUsecase.FindById(contextParse.ID)
+
+	//* Test Queue
+	queuePayload := map[string]interface{}{
+		"user_id":    user.ID,
+		"username":   user.Username,
+		"created_at": user.CreatedAt,
+	}
+	log.Printf("[User Handler - Me] Queue Payload: %v", queuePayload)
+
+	err := queuePkg.Dispatch(
+		context.Background(),
+		userQueue.NewUserQueue(userQueue.QUEUE_NAME),
+		queuePkg.QueueMessage{
+			UniqueID: utils.GenerateUUID(),
+			Payload:  queuePayload,
+		},
+	)
+	if err != nil {
+		log.Printf("Failed to dispatch message to queue: %s", err)
+	}
 
 	ctx.JSON(http.StatusOK, response.BaseSuccessResponse{
 		Code:   http.StatusOK,

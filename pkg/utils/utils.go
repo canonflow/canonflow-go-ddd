@@ -3,7 +3,13 @@ package utils
 import (
 	"reflect"
 	"strings"
+
+	"github.com/google/uuid"
 )
+
+func GenerateUUID() string {
+	return uuid.NewString()
+}
 
 func SliceContains[T comparable](slice []T, val T) bool {
 	for _, v := range slice {

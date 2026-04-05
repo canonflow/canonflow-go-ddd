@@ -10,6 +10,7 @@ import (
 
 	"github.com/canonflow/canonflow-go-ddd/internal/config"
 	"github.com/canonflow/canonflow-go-ddd/internal/contract"
+	userQueue "github.com/canonflow/canonflow-go-ddd/internal/domain/user/queue"
 	queuePkg "github.com/canonflow/canonflow-go-ddd/pkg/queue"
 	"gorm.io/gorm"
 )
@@ -18,6 +19,14 @@ func main() {
 	viperConfig := config.NewViper()
 	logrus := config.NewLogrus(viperConfig)
 	db := config.NewDatabase(viperConfig, logrus)
+	defer queuePkg.CloseConnection()
+
+	// TODO: Init Queue
+	config.NewQueue(viperConfig, logrus)
+	queuePkg.RegisterQueueHandler([]contract.QueueContract{
+		userQueue.NewUserQueue(userQueue.QUEUE_NAME),
+	})
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -40,14 +49,14 @@ func main() {
 				}
 
 				//* Inject Payload to Handler
-				if err := handler.InjectPayload(queueMessage.Payload); err != nil {
-					logrus.Printf("Failed to inject payload to handler for queue %s: %s", queueName, err)
-					queuePkg.UpdateQueueStatus(queueMessage.UniqueID, queuePkg.StatusFailed)
-					continue
-				}
+				// if err := handler.InjectPayload(queueMessage.Payload); err != nil {
+				// 	logrus.Printf("Failed to inject payload to handler for queue %s: %s", queueName, err)
+				// 	queuePkg.UpdateQueueStatus(queueMessage.UniqueID, queuePkg.StatusFailed)
+				// 	continue
+				// }
 
 				//* Handle the message
-				if err := handler.Handle(); err != nil {
+				if err := handler.Handle(queueMessage.Payload); err != nil {
 					logrus.Printf("Failed to handle message for queue %s: %s", queueName, err)
 					queuePkg.UpdateQueueStatus(queueMessage.UniqueID, queuePkg.StatusFailed)
 					continue
